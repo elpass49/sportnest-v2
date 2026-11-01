@@ -14,7 +14,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const testFile = join(root, 'supabase', 'tests', 'flux_complet.sql');
+const suites = [
+  { file: 'supabase/tests/flux_complet.sql', label: 'Flux métier complet' },
+  { file: 'supabase/tests/securite.sql', label: 'Sécurité (RLS, rôles)' },
+];
 
 let containerId = '';
 try {
@@ -29,23 +32,29 @@ if (!containerId) {
   process.exit(1);
 }
 
-const sql = readFileSync(testFile, 'utf8');
+let failed = false;
 
-const result = spawnSync(
-  'docker',
-  ['exec', '-i', containerId, 'psql', '-U', 'postgres', '-d', 'postgres',
-   '-v', 'ON_ERROR_STOP=1', '-q', '-f', '-'],
-  { input: sql, encoding: 'utf8' },
-);
+for (const suite of suites) {
+  const sql = readFileSync(join(root, suite.file), 'utf8');
+  const result = spawnSync(
+    'docker',
+    ['exec', '-i', containerId, 'psql', '-U', 'postgres', '-d', 'postgres',
+     '-v', 'ON_ERROR_STOP=1', '-q', '-f', '-'],
+    { input: sql, encoding: 'utf8' },
+  );
 
-const out = `${result.stdout ?? ''}${result.stderr ?? ''}`;
-const errors = out.split('\n').filter((l) => /ERROR|ASSERTION ÉCHOUÉE/.test(l));
+  const out = `${result.stdout ?? ''}${result.stderr ?? ''}`;
+  const errors = out.split('\n').filter((l) => /ERROR|ASSERTION ÉCHOUÉE/.test(l));
 
-if (result.status !== 0 || errors.length > 0) {
-  for (const line of errors) console.error('  ' + line);
-  console.error('✖ Flux de bout en bout en échec');
-  process.exit(result.status || 1);
+  if (result.status !== 0 || errors.length > 0) {
+    for (const line of errors) console.error('  ' + line);
+    console.error(`✖ ${suite.label} : ÉCHEC`);
+    failed = true;
+  } else {
+    console.log(`✔ ${suite.label} : OK`);
+  }
 }
 
-console.log('✔ Flux de bout en bout validé : adhésion → cours → dossier → paiement → facture');
-console.log('  (25 assertions, transaction annulée en fin de test)');
+if (failed) process.exit(1);
+
+console.log('  (25 assertions métier + 12 assertions de sécurité, transactions annulées)');
