@@ -57,4 +57,4 @@ for (const suite of suites) {
 
 if (failed) process.exit(1);
 
-console.log('  (25 assertions métier + 12 assertions de sécurité, transactions annulées)');
+console.log('  (25 assertions métier + 16 assertions de sécurité, transactions annulées)');
