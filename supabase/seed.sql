@@ -57,17 +57,19 @@ join public.professeurs p on p.nom = v.prof;
 -- -----------------------------------------------------------------------------
 -- 120 adhérents
 -- -----------------------------------------------------------------------------
-insert into public.membres (saison_id, nom, prenom, date_naissance, email, telephone)
+insert into public.membres (saison_id, nom, prenom, date_naissance, email, telephone, cree_le)
 select
   'a0000000-0000-0000-0000-000000000001',
+  -- patronymes dispersés : deux adhérents consécutifs n'ont pas le même nom
   (array['MARTIN','BERNARD','DUBOIS','ROBERT','RICHARD','PETIT','DURAND','LEROY',
          'MOREAU','SIMON','LAURENT','LEFEBVRE','MICHEL','GARCIA','DAVID','BERTRAND',
-         'ROUX','VINCENT','FOURNIER','MOREL'])[1 + (i % 20)],
+         'ROUX','VINCENT','FOURNIER','MOREL'])[1 + ((7 * i + (i / 20)) % 20)],
   (array['Léa','Noé','Zoé','Hugo','Emma','Nathan','Chloé','Enzo','Manon','Théo',
          'Inès','Louis','Jade','Gabriel','Louise','Raphaël','Alice','Arthur','Rose','Jules'])[1 + (i % 20)],
   (date '2019-01-01' - ((i * 211) % 9000 || ' days')::interval)::date,
   'membre' || (i + 1) || '@example.org',
-  '06 •• •• •• ' || lpad(((i * 7) % 90 + 10)::text, 2, '0')
+  '06 •• •• •• ' || lpad(((i * 7) % 90 + 10)::text, 2, '0'),
+  now() - ((i * 13) % 210 || ' days')::interval
 from generate_series(0, 119) as i;
 
 -- -----------------------------------------------------------------------------

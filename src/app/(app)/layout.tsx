@@ -4,8 +4,8 @@ import { SignOutButton } from '@/components/sign-out-button';
 
 const NAV = [
   { label: 'Tableau de bord', href: '/dashboard', actif: true },
-  { label: 'Dossiers', href: '/dossiers', actif: false },
-  { label: 'Adhérents', href: '/adherents', actif: false },
+  { label: 'Dossiers', href: '/dossiers', actif: true },
+  { label: 'Adhérents', href: '/adherents', actif: true },
   { label: 'Cours', href: '/cours', actif: false },
   { label: 'Comptabilité', href: '/comptabilite', actif: false },
 ];
