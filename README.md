@@ -32,18 +32,30 @@ npm run test            # tests unitaires du grand livre et du formatage
 npm run lint            # ESLint
 npm run lint:readonly   # échoue si un .insert/.update/.upsert/.delete apparaît
 npm run build           # build de production
+
+npm run db:start        # base Supabase locale (Docker)
+npm run db:test         # flux complet : adhésion → cours → dossier → paiement → facture
+npm run db:stop         # arrêt de la base locale
 ```
 
 ## État d'avancement
 
 | Phase | État |
 |---|---|
-| 0 — dépôt, socle, staging | dépôt privé créé, app générée, garde lecture seule en place |
-| 1 — contrat de données | `supabase/v2-contract.sql` écrit — à appliquer sur staging |
+| 0 — dépôt, socle | ✅ dépôt privé, Next 16, garde lecture seule, 12 tests unitaires |
+| 1 — base saine | ✅ schéma + invariants + 25 assertions de bout en bout (local Docker) |
 | 2 — auth + coquille | à faire |
 | 3 — écrans (dashboard, dossiers, suivi, comptabilité) | à faire |
 | 4 — parité V1/V2 | à faire |
 | 5 — pilote et bascule | à faire |
+| 5 bis — import des données V1 | à faire (export → import → réconciliation au centime) |
+
+### La base en une phrase
+
+Aucun total n'est stocké : `v_dossiers` et `v_kpis` recalculent tout à partir
+des lignes et des paiements, et les règles métier (capacité, surpaiement,
+remboursement, gel après facture, idempotence) sont des **triggers et
+contraintes**, pas des contrôles côté front.
 
 ## Invariant financier
 
